@@ -11,26 +11,39 @@
         ResizeMode="NoResize"
         SizeToContent="WidthAndHeight"
         mc:Ignorable="d">
-    <local:Graph x:Name="graph"
-                 Width="400"
-                 Height="400"
-                 PointSize="8,8">
-        <local:Graph.XAxis>
-            <local:AxisDefinition Interval="0.25"
-                        Max="1.5"
-                        Min="-1.5"
-                        Thickness="1"
-                        Color="Black" />
-        </local:Graph.XAxis>
-        <local:Graph.YAxis>
-            <local:AxisDefinition Interval="0.25"
-                        Max="1.5"
-                        Min="-1.5"
-                        Thickness="1"
-                        Color="Black" />
-        </local:Graph.YAxis>
-        <local:Graph.Ticks>
-            <local:TicksDefinition Color="Black" Width="5" Thickness="1" />
-        </local:Graph.Ticks>
-    </local:Graph>
+    <StackPanel>
+        <local:Graph x:Name="graph"
+                     Width="500"
+                     Height="500"
+                     PointSize="8,8">
+            <local:Graph.XAxis>
+                <local:AxisDefinition Interval="0.25"
+                                      Max="1.5"
+                                      Min="-1.5"
+                                      Thickness="1"
+                                      Color="Black" />
+            </local:Graph.XAxis>
+            <local:Graph.YAxis>
+                <local:AxisDefinition Interval="0.25"
+                                      Max="1.5"
+                                      Min="-1.5"
+                                      Thickness="1"
+                                      Color="Black" />
+            </local:Graph.YAxis>
+            <local:Graph.Ticks>
+                <local:TicksDefinition Width="5"
+                                       Thickness="1"
+                                       Color="Black" />
+            </local:Graph.Ticks>
+        </local:Graph>
+        <TextBox Name="functionBox"
+                 Width="500"
+                 FontFamily="Consolas"
+                 FontSize="14.667"
+                 HorizontalScrollBarVisibility="Auto"
+                 Padding="5" />
+        <Button Height="30"
+                Click="Button_Click"
+                Content="Evaluate" />
+    </StackPanel>
 </Window>

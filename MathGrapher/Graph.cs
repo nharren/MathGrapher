@@ -77,7 +77,7 @@ namespace MathGrapher
 
         internal void DrawFunction()
         {
-            if (graphCanvas == null)
+            if (graphCanvas == null || Function == null)
             {
                 return;
             }
