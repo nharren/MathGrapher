@@ -9,5 +9,6 @@ namespace MathGrapher
         public double Max { get; set; }
         public double Min { get; set; }
         public double Thickness { get; set; }
+        public TickLabelsDefinition TickLabels { get; set; }
     }
 }

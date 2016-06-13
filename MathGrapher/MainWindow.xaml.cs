@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
+using System;
 using System.Windows;
 using System.Windows.Media.Animation;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.Scripting;
+
 namespace MathGrapher
 {
     public partial class MainWindow : Window
@@ -12,13 +13,6 @@ namespace MathGrapher
             InitializeComponent();
 
             Loaded += MainWindow_Loaded;
-        }
-
-        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            functionBox.Text = "x => new Point(Math.Sin(x) * Math.Cos(3 * 2 * Math.PI * x), Math.Sin(x) * Math.Sin(3 * 2 * Math.PI * x))";
-
-            CreateFunction("x => new Point(Math.Sin(x) * Math.Cos(3 * 2 * Math.PI * x), Math.Sin(x) * Math.Sin(3 * 2 * Math.PI * x))");
         }
 
         public async void CreateFunction(string expression)
@@ -50,6 +44,13 @@ namespace MathGrapher
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             CreateFunction(functionBox.Text);
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            functionBox.Text = "x => new Point(Math.Sin(x) * Math.Cos(3 * 2 * Math.PI * x), Math.Sin(x) * Math.Sin(3 * 2 * Math.PI * x))";
+
+            CreateFunction("x => new Point(Math.Sin(x) * Math.Cos(3 * 2 * Math.PI * x), Math.Sin(x) * Math.Sin(3 * 2 * Math.PI * x))");
         }
     }
 }

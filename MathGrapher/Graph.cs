@@ -175,6 +175,13 @@ namespace MathGrapher
                 return;
             }
 
+            DrawXAxisLine();
+            DrawXAxisTicks();
+            DrawXAxisTickLabels();
+        }
+
+        private void DrawXAxisLine()
+        {
             var xAxis = new Line();
             xAxis.Stroke = new SolidColorBrush(XAxis.Color);
             xAxis.StrokeThickness = XAxis.Thickness;
@@ -184,7 +191,51 @@ namespace MathGrapher
             xAxis.Y2 = originY;
 
             graphCanvas.Children.Add(xAxis);
+        }
 
+        private void DrawXAxisTickLabels()
+        {
+            if (XAxis.TickLabels == null)
+            {
+                return;
+            }
+
+            for (int i = 1; i < tickCountX; i += XAxis.TickLabels.Frequency)
+            {
+                var tickLabel = new TextBlock();
+                tickLabel.Foreground = XAxis.TickLabels.Foreground;
+                tickLabel.FontFamily = XAxis.TickLabels.FontFamily;
+                tickLabel.FontSize = XAxis.TickLabels.FontSize;
+                tickLabel.FontStyle = XAxis.TickLabels.FontStyle;
+                tickLabel.FontWeight = XAxis.TickLabels.FontWeight;
+                tickLabel.Text = (-i * XAxis.Interval).ToString();
+
+                tickLabel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+
+                Canvas.SetLeft(tickLabel, originY - i * tickWidthX - tickLabel.DesiredSize.Width / 2);
+                Canvas.SetTop(tickLabel, originX + XAxis.TickLabels.Offset);
+
+                graphCanvas.Children.Add(tickLabel);
+
+                var tickLabel2 = new TextBlock();
+                tickLabel2.Foreground = XAxis.TickLabels.Foreground;
+                tickLabel2.FontFamily = XAxis.TickLabels.FontFamily;
+                tickLabel2.FontSize = XAxis.TickLabels.FontSize;
+                tickLabel2.FontStyle = XAxis.TickLabels.FontStyle;
+                tickLabel2.FontWeight = XAxis.TickLabels.FontWeight;
+                tickLabel2.Text = (i * XAxis.Interval).ToString();
+
+                tickLabel2.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+
+                Canvas.SetLeft(tickLabel2, originY + i * tickWidthX - tickLabel2.DesiredSize.Width / 2);
+                Canvas.SetTop(tickLabel2, originX + XAxis.TickLabels.Offset);
+
+                graphCanvas.Children.Add(tickLabel2);
+            }
+        }
+
+        private void DrawXAxisTicks()
+        {
             if (Ticks == null)
             {
                 return;
@@ -221,6 +272,13 @@ namespace MathGrapher
                 return;
             }
 
+            DrawYAxisLine();
+            DrawYAxisTicks();
+            DrawYAxisTickLabels();
+        }
+
+        private void DrawYAxisLine()
+        {
             var yAxis = new Line();
             yAxis.Stroke = new SolidColorBrush(YAxis.Color);
             yAxis.StrokeThickness = YAxis.Thickness;
@@ -230,7 +288,51 @@ namespace MathGrapher
             yAxis.Y2 = Height;
 
             graphCanvas.Children.Add(yAxis);
+        }
 
+        private void DrawYAxisTickLabels()
+        {
+            if (YAxis.TickLabels == null)
+            {
+                return;
+            }
+
+            for (int i = 1; i < tickCountY; i += YAxis.TickLabels.Frequency)
+            {
+                var tickLabel = new TextBlock();
+                tickLabel.Foreground = YAxis.TickLabels.Foreground;
+                tickLabel.FontFamily = YAxis.TickLabels.FontFamily;
+                tickLabel.FontSize = YAxis.TickLabels.FontSize;
+                tickLabel.FontStyle = YAxis.TickLabels.FontStyle;
+                tickLabel.FontWeight = YAxis.TickLabels.FontWeight;
+                tickLabel.Text = (-i * YAxis.Interval).ToString();
+
+                tickLabel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+
+                Canvas.SetLeft(tickLabel, originX - XAxis.TickLabels.Offset - tickLabel.DesiredSize.Width);
+                Canvas.SetTop(tickLabel, originY + i * tickWidthY - tickLabel.DesiredSize.Height / 2);
+
+                graphCanvas.Children.Add(tickLabel);
+
+                var tickLabel2 = new TextBlock();
+                tickLabel2.Foreground = YAxis.TickLabels.Foreground;
+                tickLabel2.FontFamily = YAxis.TickLabels.FontFamily;
+                tickLabel2.FontSize = YAxis.TickLabels.FontSize;
+                tickLabel2.FontStyle = YAxis.TickLabels.FontStyle;
+                tickLabel2.FontWeight = YAxis.TickLabels.FontWeight;
+                tickLabel2.Text = (i * YAxis.Interval).ToString();
+
+                tickLabel2.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+
+                Canvas.SetLeft(tickLabel2, originX - XAxis.TickLabels.Offset - tickLabel2.DesiredSize.Width);
+                Canvas.SetTop(tickLabel2, originY - i * tickWidthY - tickLabel2.DesiredSize.Height / 2);
+
+                graphCanvas.Children.Add(tickLabel2);
+            }
+        }
+
+        private void DrawYAxisTicks()
+        {
             if (Ticks == null)
             {
                 return;
