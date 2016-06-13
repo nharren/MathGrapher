@@ -1,0 +1,33 @@
+﻿<Window x:Class="MathGrapher.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:MathGrapher"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        Name="mainWindow"
+        Title="MainWindow"
+        Width="525"
+        Height="350"
+        ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight"
+        mc:Ignorable="d">
+    <local:Graph x:Name="graph"
+                 Width="400"
+                 Height="400"
+                 PointSize="8,8">
+        <local:Graph.XAxis>
+            <local:AxisDefinition Interval="1"
+                        Max="1.5"
+                        Min="-1.5"
+                        Thickness="1"
+                        Color="Black" />
+        </local:Graph.XAxis>
+        <local:Graph.YAxis>
+            <local:AxisDefinition Interval="1"
+                        Max="1.5"
+                        Min="-1.5"
+                        Thickness="1"
+                        Color="Black" />
+        </local:Graph.YAxis>
+    </local:Graph>
+</Window>
