@@ -5,7 +5,7 @@
         xmlns:local="clr-namespace:MathGrapher"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         Name="mainWindow"
-        Title="MainWindow"
+        Title="Math Grapher"
         Width="525"
         Height="350"
         ResizeMode="NoResize"
@@ -16,18 +16,21 @@
                  Height="400"
                  PointSize="8,8">
         <local:Graph.XAxis>
-            <local:AxisDefinition Interval="1"
+            <local:AxisDefinition Interval="0.25"
                         Max="1.5"
                         Min="-1.5"
                         Thickness="1"
                         Color="Black" />
         </local:Graph.XAxis>
         <local:Graph.YAxis>
-            <local:AxisDefinition Interval="1"
+            <local:AxisDefinition Interval="0.25"
                         Max="1.5"
                         Min="-1.5"
                         Thickness="1"
                         Color="Black" />
         </local:Graph.YAxis>
+        <local:Graph.Ticks>
+            <local:TicksDefinition Color="Black" Width="5" Thickness="1" />
+        </local:Graph.Ticks>
     </local:Graph>
 </Window>

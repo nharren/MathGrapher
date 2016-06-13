@@ -15,8 +15,15 @@ namespace MathGrapher
         public static readonly DependencyProperty YAxisProperty = DependencyProperty.Register("YAxis", typeof(AxisDefinition), typeof(Graph), new PropertyMetadata(null, YAxisChanged));
 
         private Canvas graphCanvas;
-        private Point origin;
+        private double originTickIndexX;
+        private double originTickIndexY;
+        private double originX;
+        private double originY;
         private Ellipse point;
+        private double tickCountX;
+        private double tickCountY;
+        private double tickWidthX;
+        private double tickWidthY;
 
         static Graph()
         {
@@ -36,6 +43,8 @@ namespace MathGrapher
             get { return (Size)GetValue(PointSizeProperty); }
             set { SetValue(PointSizeProperty, value); }
         }
+
+        public TicksDefinition Ticks { get; set; }
 
         public double X
         {
@@ -58,23 +67,11 @@ namespace MathGrapher
         public override void OnApplyTemplate()
         {
             graphCanvas = (Canvas)Template.FindName("PART_GraphCanvas", this);
+
             graphCanvas.Children.Clear();
-
             CalculateOrigin();
-
-            var xAxis = GenerateXAxis(origin);
-            var yAxis = GenerateYAxis(origin);
-
-            if (xAxis != null)
-            {
-                graphCanvas.Children.Add(xAxis);
-            }
-
-            if (yAxis != null)
-            {
-                graphCanvas.Children.Add(yAxis);
-            }
-
+            DrawXAxis();
+            DrawYAxis();
             DrawFunction();
         }
 
@@ -84,9 +81,6 @@ namespace MathGrapher
             {
                 return;
             }
-
-            var xTickWidth = Width / (XAxis.Max - XAxis.Min);
-            var yTickWidth = Height / (YAxis.Max - YAxis.Min);
 
             if (point != null)
             {
@@ -102,8 +96,8 @@ namespace MathGrapher
 
             var result = Function(X);
 
-            Canvas.SetLeft(point, origin.X + result.X * xTickWidth - PointSize.Width / 2);
-            Canvas.SetTop(point, origin.Y - result.Y * yTickWidth - PointSize.Height / 2);
+            Canvas.SetLeft(point, originX + (result.X / XAxis.Interval) * tickWidthX - PointSize.Width / 2);
+            Canvas.SetTop(point, originY - (result.Y / YAxis.Interval) * tickWidthY - PointSize.Height / 2);
 
             graphCanvas.Children.Add(point);
         }
@@ -131,72 +125,139 @@ namespace MathGrapher
 
         private void CalculateOrigin()
         {
-            var xOriginTick = double.NaN;
-            var yOriginTick = double.NaN;
+            tickCountX = (XAxis.Max - XAxis.Min) / XAxis.Interval;
+            tickCountY = (YAxis.Max - YAxis.Min) / YAxis.Interval;
 
-            if (XAxis != null && 0 - XAxis.Min < XAxis.Max - XAxis.Min)
+            tickWidthX = Width / tickCountX;
+            tickWidthY = Height / tickCountY;
+
+            if (XAxis != null && XAxis.Min <= 0 && XAxis.Max >= 0)
             {
-                xOriginTick = 0 - XAxis.Min;
+                originTickIndexX = (0 - XAxis.Min) / XAxis.Interval;
+            }
+            else
+            {
+                originTickIndexX = double.NaN;
             }
 
-            if (YAxis != null && 0 - YAxis.Min < YAxis.Max - YAxis.Min)
+            if (YAxis != null && YAxis.Min <= 0 && YAxis.Max >= 0)
             {
-                yOriginTick = 0 - YAxis.Min;
+                originTickIndexY = (0 - YAxis.Min) / YAxis.Interval;
+            }
+            else
+            {
+                originTickIndexY = double.NaN;
             }
 
-            var xTickWidth = Width / (XAxis.Max - XAxis.Min);
-            var yTickWidth = Height / (YAxis.Max - YAxis.Min);
-
-            var xOrigin = double.NaN;
-            var yOrigin = double.NaN;
-
-            if (!double.IsNaN(xOriginTick))
+            if (double.IsNaN(originTickIndexX))
             {
-                xOrigin = xOriginTick * xTickWidth;
+                originX = double.NaN;
+            }
+            else
+            {
+                originX = originTickIndexX * tickWidthX;
             }
 
-            if (!double.IsNaN(yOriginTick))
+            if (double.IsNaN(originTickIndexY))
             {
-                yOrigin = yOriginTick * yTickWidth;
+                originY = double.NaN;
             }
-
-            origin = new Point(xOrigin, yOrigin);
+            else
+            {
+                originY = originTickIndexY * tickWidthY;
+            }
         }
 
-        private Line GenerateXAxis(Point origin)
+        private void DrawXAxis()
         {
-            if (double.IsNaN(origin.Y))
+            if (double.IsNaN(originY))
             {
-                return null;
+                return;
             }
 
             var xAxis = new Line();
             xAxis.Stroke = new SolidColorBrush(XAxis.Color);
             xAxis.StrokeThickness = XAxis.Thickness;
             xAxis.X1 = 0;
-            xAxis.Y1 = origin.Y;
+            xAxis.Y1 = originY;
             xAxis.X2 = Width;
-            xAxis.Y2 = origin.Y;
+            xAxis.Y2 = originY;
 
-            return xAxis;
+            graphCanvas.Children.Add(xAxis);
+
+            if (Ticks == null)
+            {
+                return;
+            }
+
+            for (int i = 1; i < tickCountX; i++)
+            {
+                var tick = new Line();
+                tick.Stroke = new SolidColorBrush(Ticks.Color);
+                tick.StrokeThickness = Ticks.Thickness;
+                tick.X1 = originY - i * tickWidthX;
+                tick.Y1 = originX - Ticks.Width / 2;
+                tick.X2 = originY - i * tickWidthX;
+                tick.Y2 = originX + Ticks.Width / 2;
+
+                graphCanvas.Children.Add(tick);
+
+                var tick2 = new Line();
+                tick2.Stroke = new SolidColorBrush(Ticks.Color);
+                tick2.StrokeThickness = Ticks.Thickness;
+                tick2.X1 = originY + i * tickWidthX;
+                tick2.Y1 = originX - Ticks.Width / 2;
+                tick2.X2 = originY + i * tickWidthX;
+                tick2.Y2 = originX + Ticks.Width / 2;
+
+                graphCanvas.Children.Add(tick2);
+            }
         }
 
-        private Line GenerateYAxis(Point origin)
+        private void DrawYAxis()
         {
-            if (double.IsNaN(origin.X))
+            if (double.IsNaN(originX))
             {
-                return null;
+                return;
             }
 
             var yAxis = new Line();
             yAxis.Stroke = new SolidColorBrush(YAxis.Color);
             yAxis.StrokeThickness = YAxis.Thickness;
-            yAxis.X1 = origin.X;
+            yAxis.X1 = originX;
             yAxis.Y1 = 0;
-            yAxis.X2 = origin.X;
+            yAxis.X2 = originX;
             yAxis.Y2 = Height;
 
-            return yAxis;
+            graphCanvas.Children.Add(yAxis);
+
+            if (Ticks == null)
+            {
+                return;
+            }
+
+            for (int i = 1; i < tickCountY; i++)
+            {
+                var tick = new Line();
+                tick.Stroke = new SolidColorBrush(Ticks.Color);
+                tick.StrokeThickness = Ticks.Thickness;
+                tick.X1 = originX - Ticks.Width / 2;
+                tick.Y1 = originY - i * tickWidthY;
+                tick.X2 = originX + Ticks.Width / 2;
+                tick.Y2 = originY - i * tickWidthY;
+
+                graphCanvas.Children.Add(tick);
+
+                var tick2 = new Line();
+                tick2.Stroke = new SolidColorBrush(Ticks.Color);
+                tick2.StrokeThickness = Ticks.Thickness;
+                tick2.X1 = originX - Ticks.Width / 2;
+                tick2.Y1 = originY + i * tickWidthY;
+                tick2.X2 = originX + Ticks.Width / 2;
+                tick2.Y2 = originY + i * tickWidthY;
+
+                graphCanvas.Children.Add(tick2);
+            }
         }
     }
 }
