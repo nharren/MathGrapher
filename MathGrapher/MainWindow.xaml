@@ -8,58 +8,51 @@
         Title="Math Grapher"
         Width="525"
         Height="350"
+        FontFamily="Consolas"
+        FontSize="14.667"
         ResizeMode="NoResize"
         SizeToContent="WidthAndHeight"
         mc:Ignorable="d">
-    <StackPanel>
-        <local:Graph x:Name="graph"
-                     Width="500"
-                     Height="500"
-                     PointSize="8,8">
-            <local:Graph.XAxis>
-                <local:AxisDefinition Interval="0.25"
-                                      Max="1.5"
-                                      Min="-1.5"
-                                      Thickness="1"
-                                      Color="Black">
-                    <local:AxisDefinition.TickLabels>
-                        <local:TickLabelsDefinition FontFamily="Calibri"
-                                                    FontSize="10.667"
-                                                    Foreground="Black"
-                                                    Frequency="2"
-                                                    Offset="4" />
-                    </local:AxisDefinition.TickLabels>
-                </local:AxisDefinition>
-            </local:Graph.XAxis>
-            <local:Graph.YAxis>
-                <local:AxisDefinition Interval="0.25"
-                                      Max="1.5"
-                                      Min="-1.5"
-                                      Thickness="1"
-                                      Color="Black">
-                    <local:AxisDefinition.TickLabels>
-                        <local:TickLabelsDefinition FontFamily="Calibri"
-                                                    FontSize="10.667"
-                                                    Foreground="Black"
-                                                    Frequency="2"
-                                                    Offset="4" />
-                    </local:AxisDefinition.TickLabels>
-                </local:AxisDefinition>
-            </local:Graph.YAxis>
-            <local:Graph.Ticks>
-                <local:TicksDefinition Width="5"
-                                       Thickness="1"
-                                       Color="Black" />
-            </local:Graph.Ticks>
-        </local:Graph>
-        <TextBox Name="functionBox"
+    <local:Graph x:Name="graph"
                  Width="500"
-                 FontFamily="Consolas"
-                 FontSize="14.667"
-                 HorizontalScrollBarVisibility="Auto"
-                 Padding="5" />
-        <Button Height="30"
-                Click="Button_Click"
-                Content="Evaluate" />
-    </StackPanel>
+                 Height="500"
+                 AnimationDuration="0:0:3"
+                 Domain="0,6.283"
+                 PointSize="8,8">
+        <local:Graph.XAxis>
+            <local:AxisDefinition Interval="0.25"
+                                  Max="1.5"
+                                  Min="-1.5"
+                                  Thickness="1"
+                                  Color="Black">
+                <local:AxisDefinition.TickLabels>
+                    <local:TickLabelsDefinition FontFamily="Calibri"
+                                                FontSize="10.667"
+                                                Foreground="Black"
+                                                Frequency="2"
+                                                Offset="4" />
+                </local:AxisDefinition.TickLabels>
+            </local:AxisDefinition>
+        </local:Graph.XAxis>
+        <local:Graph.YAxis>
+            <local:AxisDefinition Interval="0.25"
+                                  Max="1.5"
+                                  Min="-1.5"
+                                  Thickness="1"
+                                  Color="Black">
+                <local:AxisDefinition.TickLabels>
+                    <local:TickLabelsDefinition FontFamily="Calibri"
+                                                FontSize="10.667"
+                                                Foreground="Black"
+                                                Frequency="2"
+                                                Offset="4" />
+                </local:AxisDefinition.TickLabels>
+            </local:AxisDefinition>
+        </local:Graph.YAxis>
+        <local:Graph.Ticks>
+            <local:TicksDefinition Width="5"
+                                   Thickness="1"
+                                   Color="Black" />
+        </local:Graph.Ticks>
+    </local:Graph>
 </Window>
