@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
@@ -29,6 +30,8 @@ namespace MathGrapher
         private double tickCountY;
         private double tickWidthX;
         private double tickWidthY;
+        private ICommand saveAsPngCommand;
+        private ICommand saveAsGifCommand;
 
         static Graph()
         {
@@ -107,6 +110,7 @@ namespace MathGrapher
         {
             graphCanvas = (Canvas)Template.FindName("PART_GraphCanvas", this);
             Draw();
+            UpdateContextMenu();
         }
 
         internal void DrawFunction()
@@ -120,14 +124,6 @@ namespace MathGrapher
 
             if (AnimationDuration != TimeSpan.Zero)
             {
-                var point = new Ellipse();
-                point.Fill = new SolidColorBrush(PointColor);
-                point.StrokeThickness = 0;
-                point.Width = PointSize.Width;
-                point.Height = PointSize.Height;
-
-                graphCanvas.Children.Add(point);
-
                 var doubleAnimation = new DoubleAnimation(Domain.X, Domain.Y, AnimationDuration);
                 doubleAnimation.RepeatBehavior = RepeatBehavior.Forever;
 
@@ -159,8 +155,39 @@ namespace MathGrapher
         {
             var graph = (Graph)d;
 
-            graph.DrawFunction();
+            graph.DrawFunction();           
         }
+
+        private void UpdateContextMenu()
+        {
+            if (ContextMenu == null)
+            {
+                ContextMenu = new ContextMenu();
+            }
+            else
+            {
+                ContextMenu.Items.Clear();
+            }
+            
+            if (AnimationDuration == TimeSpan.Zero)
+            {
+                if (saveAsPngCommand == null)
+                {
+                    saveAsPngCommand = new SaveAsPngCommand();
+                }
+
+                ContextMenu.Items.Add(new MenuItem() { Header = "Save As PNG…", CommandParameter = this, Command = saveAsPngCommand });
+            }
+            else
+            {
+                if (saveAsGifCommand == null)
+                {
+                    saveAsGifCommand = new SaveAsGifCommand();
+                }
+
+                ContextMenu.Items.Add(new MenuItem() { Header = "Save As Animated GIF…", CommandParameter = this, Command = saveAsGifCommand });
+            }
+        }       
 
         private static void DomainChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -459,7 +486,18 @@ namespace MathGrapher
 
         private void UpdatePoint()
         {
-            var point = graphCanvas.Children.OfType<Ellipse>().First();
+            var point = graphCanvas.Children.OfType<Ellipse>().FirstOrDefault();
+
+            if (point == null)
+            {
+                point = new Ellipse();
+                point.Fill = new SolidColorBrush(PointColor);
+                point.StrokeThickness = 0;
+                point.Width = PointSize.Width;
+                point.Height = PointSize.Height;
+
+                graphCanvas.Children.Add(point);
+            }
 
             var result = Function(X);
 

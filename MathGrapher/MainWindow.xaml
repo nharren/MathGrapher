@@ -16,7 +16,8 @@
     <local:Graph x:Name="graph"
                  Width="500"
                  Height="500"
-                 AnimationDuration="0:0:3"
+                 AnimationDuration="0:0:10"
+                 Background="White"
                  Domain="0,6.283"
                  PointSize="8,8">
         <local:Graph.XAxis>
