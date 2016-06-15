@@ -96,7 +96,8 @@ namespace MathGrapher
             WriteByte(inputStream.ReadByte()); // Extension Introducer
             WriteByte(inputStream.ReadByte()); // Graphic Control Label
             WriteByte(inputStream.ReadByte()); // Block Size
-            WriteByte(inputStream.ReadByte()); // Reserved (3 Bits), Disposal Method (3 Bits), User Input Flag (1 Bit), Transparent Color Flag (1 Bit)
+            WriteByte(0x04); // Reserved (3 Bits), Disposal Method (3 Bits), User Input Flag (1 Bit), Transparent Color Flag (1 Bit)
+            inputStream.ReadByte();
             WriteShort(Convert.ToInt32(frameDelay.TotalSeconds * 100)); // Delay Time
             inputStream.ReadByte();
             inputStream.ReadByte();
