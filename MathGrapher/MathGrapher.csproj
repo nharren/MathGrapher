@@ -57,9 +57,14 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AnimatedGifEncoder.cs" />
+    <Compile Include="TickLabelGenerators\ImaginaryWholeNumberTickLabelGenerator.cs" />
+    <Compile Include="TickLabelGenerators\WholeNumberTickLabelGenerator.cs" />
+    <Compile Include="TickLabelGenerators\DefaultTickLabelGenerator.cs" />
+    <Compile Include="TickLabelGenerators\DelegateTickLabelGenerator.cs" />
+    <Compile Include="ITickLabelGenerator.cs" />
     <Compile Include="SaveAsGifCommand.cs" />
     <Compile Include="SaveAsPngCommand.cs" />
-    <Compile Include="TickLabelsDefinition.cs" />
+    <Compile Include="TickLabelGenerators\EvenNumberTickLabelGenerator.cs" />
     <Compile Include="TicksDefinition.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

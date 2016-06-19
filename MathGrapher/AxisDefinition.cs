@@ -4,11 +4,11 @@ namespace MathGrapher
 {
     public class AxisDefinition
     {
-        public Color Color { get; set; }
-        public double Min { get; set; }
-        public double Max { get; set; }
-        public double Interval { get; set; }
-        public double Thickness { get; set; }
-        public TickLabelsDefinition TickLabels { get; set; }
+        public Color Color { get; set; } = Colors.Black;
+        public double Min { get; set; } = -10;
+        public double Max { get; set; } = 10;
+        public double Interval { get; set; } = 1;
+        public double Thickness { get; set; } = 1;
+        public ITickLabelGenerator TickLabelGenerator { get; set; } = new DefaultTickLabelGenerator();
     }
 }

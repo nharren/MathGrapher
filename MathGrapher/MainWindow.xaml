@@ -13,42 +13,36 @@
         ResizeMode="NoResize"
         SizeToContent="WidthAndHeight"
         mc:Ignorable="d">
+    <Window.Resources>
+        <local:WholeNumberTickLabelGenerator x:Key="WholeNumberTickLabelGenerator" />
+        <local:ImaginaryWholeNumberTickLabelGenerator x:Key="ImaginaryWholeNumberTickLabelGenerator" />
+    </Window.Resources>
     <local:Graph x:Name="graph"
                  Width="500"
                  Height="500"
-                 AnimationDuration="0:0:10"
                  Background="White"
-                 Domain="0,6.283"
-                 PointSize="8,8">
+                 Domain="-10,10"
+                 PointSize="8,8"
+                 Samples="10000">
+        <local:Graph.DomainAnimation>
+            <DoubleAnimationUsingKeyFrames Duration="0:0:4" RepeatBehavior="Forever">
+                <DiscreteDoubleKeyFrame KeyTime="0:0:0" Value="4" />
+                <DiscreteDoubleKeyFrame KeyTime="0:0:1" Value="1" />
+                <DiscreteDoubleKeyFrame KeyTime="0:0:2" Value="2" />
+                <DiscreteDoubleKeyFrame KeyTime="0:0:3" Value="3" />
+            </DoubleAnimationUsingKeyFrames>
+        </local:Graph.DomainAnimation>
         <local:Graph.XAxis>
-            <local:AxisDefinition Interval="0.25"
+            <local:AxisDefinition Interval="0.5"
                                   Max="1.5"
                                   Min="-1.5"
-                                  Thickness="1"
-                                  Color="Black">
-                <local:AxisDefinition.TickLabels>
-                    <local:TickLabelsDefinition FontFamily="Calibri"
-                                                FontSize="10.667"
-                                                Foreground="Black"
-                                                Frequency="2"
-                                                Offset="4" />
-                </local:AxisDefinition.TickLabels>
-            </local:AxisDefinition>
+                                  TickLabelGenerator="{StaticResource WholeNumberTickLabelGenerator}" />
         </local:Graph.XAxis>
         <local:Graph.YAxis>
-            <local:AxisDefinition Interval="0.25"
+            <local:AxisDefinition Interval="0.5"
                                   Max="1.5"
                                   Min="-1.5"
-                                  Thickness="1"
-                                  Color="Black">
-                <local:AxisDefinition.TickLabels>
-                    <local:TickLabelsDefinition FontFamily="Calibri"
-                                                FontSize="10.667"
-                                                Foreground="Black"
-                                                Frequency="2"
-                                                Offset="4" />
-                </local:AxisDefinition.TickLabels>
-            </local:AxisDefinition>
+                                  TickLabelGenerator="{StaticResource ImaginaryWholeNumberTickLabelGenerator}" />
         </local:Graph.YAxis>
         <local:Graph.Ticks>
             <local:TicksDefinition Width="5"

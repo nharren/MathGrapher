@@ -58,28 +58,44 @@ namespace MathGrapher
                 using (var fileStream = File.Create(dialog.FileName))
                 using (var encoder = new AnimatedGifEncoder(fileStream, 0))
                 {
-
-                    //var gifBitmapEncoder = new GifBitmapEncoder();
-                    var frameCount = graph.AnimationDuration.TimeSpan.TotalSeconds * 50; // frames per second.
-
-                    var xSkip = (graph.Domain.Y - graph.Domain.X) / frameCount;
-
-                    for (int i = 0; i < frameCount; i++)
+                    if (graph.DomainAnimation is DoubleAnimation)
                     {
-                        graph.X = graph.Domain.X + i * xSkip;
-                        graph.UpdateLayout();
+                        var frameCount = graph.DomainAnimation.Duration.TimeSpan.TotalSeconds * 50; // frames per second.
 
-                        var renderTargetBitmap = new RenderTargetBitmap((int)graph.ActualWidth, (int)graph.ActualHeight, 96, 96, PixelFormats.Default);
-                        renderTargetBitmap.Render(graph);
+                        var xSkip = (graph.Domain.Y - graph.Domain.X) / frameCount;
 
-                        encoder.AddFrame(renderTargetBitmap, TimeSpan.FromMilliseconds(20));
+                        for (int i = 0; i < frameCount; i++)
+                        {
+                            graph.X = graph.Domain.X + i * xSkip;
+                            graph.UpdateLayout();
+
+                            var renderTargetBitmap = new RenderTargetBitmap((int)graph.ActualWidth, (int)graph.ActualHeight, 96, 96, PixelFormats.Default);
+                            renderTargetBitmap.Render(graph);
+
+                            encoder.AddFrame(renderTargetBitmap, TimeSpan.FromMilliseconds(20));
+                        }
                     }
+                    else if (graph.DomainAnimation is DoubleAnimationUsingKeyFrames)
+                    {
+                        var animation = (DoubleAnimationUsingKeyFrames)graph.DomainAnimation;
+
+                        for (int i = 0; i < animation.KeyFrames.Count; i++)
+                        {
+                            graph.X = animation.KeyFrames[i].Value;
+                            graph.UpdateLayout();
+
+                            var renderTargetBitmap = new RenderTargetBitmap((int)graph.ActualWidth, (int)graph.ActualHeight, 96, 96, PixelFormats.Default);
+                            renderTargetBitmap.Render(graph);
+
+                            var delay = i + 1 < animation.KeyFrames.Count ? animation.KeyFrames[i + 1].KeyTime.TimeSpan - animation.KeyFrames[i].KeyTime.TimeSpan : (animation.Duration - animation.KeyFrames[i].KeyTime.TimeSpan).TimeSpan;
+
+                            encoder.AddFrame(renderTargetBitmap, delay);
+                        }
+                    }
+                    
                 }
 
-                var doubleAnimation = new DoubleAnimation(graph.Domain.X, graph.Domain.Y, graph.AnimationDuration);
-                doubleAnimation.RepeatBehavior = RepeatBehavior.Forever;
-
-                graph.BeginAnimation(Graph.XProperty, doubleAnimation);
+                graph.BeginAnimation(Graph.XProperty, graph.DomainAnimation);
             }          
         }
 

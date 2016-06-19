@@ -9,7 +9,7 @@ namespace MathGrapher
         {
             InitializeComponent();
 
-            graph.Function = x => new Point(Math.Cos(x), Math.Sin(x));
+            graph.Function = x => new Point(Math.Cos(Math.PI * x / 2), Math.Sin(Math.PI * x / 2));
         }
     }
 }
