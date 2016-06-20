@@ -6,10 +6,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         Name="mainWindow"
         Title="Math Grapher"
-        Width="525"
-        Height="350"
-        FontFamily="Consolas"
-        FontSize="14.667"
         ResizeMode="NoResize"
         SizeToContent="WidthAndHeight"
         mc:Ignorable="d">
@@ -20,29 +16,15 @@
     <local:Graph x:Name="graph"
                  Width="500"
                  Height="500"
-                 Background="White"
-                 Domain="-10,10"
-                 PointSize="8,8"
-                 Samples="10000">
-        <local:Graph.DomainAnimation>
-            <DoubleAnimationUsingKeyFrames Duration="0:0:4" RepeatBehavior="Forever">
-                <DiscreteDoubleKeyFrame KeyTime="0:0:0" Value="4" />
-                <DiscreteDoubleKeyFrame KeyTime="0:0:1" Value="1" />
-                <DiscreteDoubleKeyFrame KeyTime="0:0:2" Value="2" />
-                <DiscreteDoubleKeyFrame KeyTime="0:0:3" Value="3" />
-            </DoubleAnimationUsingKeyFrames>
-        </local:Graph.DomainAnimation>
+                 Background="White">
         <local:Graph.XAxis>
-            <local:AxisDefinition Interval="0.5"
-                                  Max="1.5"
-                                  Min="-1.5"
-                                  TickLabelGenerator="{StaticResource WholeNumberTickLabelGenerator}" />
+            <local:AxisDefinition TickLabelGenerator="{StaticResource WholeNumberTickLabelGenerator}" />
         </local:Graph.XAxis>
         <local:Graph.YAxis>
             <local:AxisDefinition Interval="0.5"
                                   Max="1.5"
                                   Min="-1.5"
-                                  TickLabelGenerator="{StaticResource ImaginaryWholeNumberTickLabelGenerator}" />
+                                  TickLabelGenerator="{StaticResource WholeNumberTickLabelGenerator}" />
         </local:Graph.YAxis>
         <local:Graph.Ticks>
             <local:TicksDefinition Width="5"

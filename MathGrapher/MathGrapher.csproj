@@ -57,6 +57,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AnimatedGifEncoder.cs" />
+    <Compile Include="FunctionDefinition.cs" />
+    <Compile Include="GraphAnimation.cs" />
     <Compile Include="TickLabelGenerators\ImaginaryWholeNumberTickLabelGenerator.cs" />
     <Compile Include="TickLabelGenerators\WholeNumberTickLabelGenerator.cs" />
     <Compile Include="TickLabelGenerators\DefaultTickLabelGenerator.cs" />

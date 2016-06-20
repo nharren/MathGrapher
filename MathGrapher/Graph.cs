@@ -1,86 +1,67 @@
 ﻿using System;
-using System.Linq;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 
 namespace MathGrapher
 {
     public class Graph : Control
     {
-        public static readonly DependencyProperty DomainAnimationProperty = DependencyProperty.Register("DomainAnimation", typeof(DoubleAnimationBase), typeof(Graph), new PropertyMetadata(null, DomainAnimationChanged));
-        public static readonly DependencyProperty DomainProperty = DependencyProperty.Register("Domain", typeof(Vector), typeof(Graph), new PropertyMetadata(default(Vector), DomainChanged));
-        public static readonly DependencyProperty FunctionProperty = DependencyProperty.Register("Function", typeof(Func<double, Point>), typeof(Graph), new PropertyMetadata(null, FunctionChanged));
-        public static readonly DependencyProperty PointColorProperty = DependencyProperty.Register("PointColor", typeof(Color), typeof(Graph), new PropertyMetadata(Colors.Red));
-        public static readonly DependencyProperty PointSizeProperty = DependencyProperty.Register("PointSize", typeof(Size), typeof(Graph), new PropertyMetadata(new Size(5d, 5d)));
-        public static readonly DependencyProperty SamplesProperty = DependencyProperty.Register("Samples", typeof(int), typeof(Graph), new PropertyMetadata(500, SamplesChanged));
         public static readonly DependencyProperty XAxisProperty = DependencyProperty.Register("XAxis", typeof(AxisDefinition), typeof(Graph), new PropertyMetadata(null, XAxisChanged));
-        public static readonly DependencyProperty XProperty = DependencyProperty.Register("X", typeof(double), typeof(Graph), new PropertyMetadata(0d, XPropertyChanged));
         public static readonly DependencyProperty YAxisProperty = DependencyProperty.Register("YAxis", typeof(AxisDefinition), typeof(Graph), new PropertyMetadata(null, YAxisChanged));
 
+        private Dictionary<FunctionDefinition, Ellipse> animatedPoints = new Dictionary<FunctionDefinition, Ellipse>();
+        private Timer animationTimer;
+        private ObservableCollection<FunctionDefinition> functionDefinitions;
         private Canvas graphCanvas;
         private double originTickIndexX;
         private double originTickIndexY;
         private double originX;
         private double originY;
+        private int position;
+        private ICommand saveAsGifCommand;
+        private ICommand saveAsPngCommand;
         private double tickCountX;
         private double tickCountY;
         private double tickWidthX;
         private double tickWidthY;
-        private ICommand saveAsPngCommand;
-        private ICommand saveAsGifCommand;
 
         static Graph()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(Graph), new FrameworkPropertyMetadata(typeof(Graph)));
         }
 
-        public DoubleAnimationBase DomainAnimation
+        public Graph()
         {
-            get { return (DoubleAnimationBase)GetValue(DomainAnimationProperty); }
-            set { SetValue(DomainAnimationProperty, value); }
+            functionDefinitions = new ObservableCollection<FunctionDefinition>();
+            functionDefinitions.CollectionChanged += FunctionDefinitions_CollectionChanged;
         }
 
-        public Vector Domain
+        public GraphAnimation Animation { get; set; }
+
+        public ObservableCollection<FunctionDefinition> FunctionDefinitions
         {
-            get { return (Vector)GetValue(DomainProperty); }
-            set { SetValue(DomainProperty, value); }
+            get
+            {
+                return functionDefinitions;
+            }
         }
 
-        public Func<double, Point> Function
+        public int Position
         {
-            get { return (Func<double, Point>)GetValue(FunctionProperty); }
-            set { SetValue(FunctionProperty, value); }
-        }
-
-        public Color PointColor
-        {
-            get { return (Color)GetValue(PointColorProperty); }
-            set { SetValue(PointColorProperty, value); }
-        }
-
-        public Size PointSize
-        {
-            get { return (Size)GetValue(PointSizeProperty); }
-            set { SetValue(PointSizeProperty, value); }
-        }
-
-        public int Samples
-        {
-            get { return (int)GetValue(SamplesProperty); }
-            set { SetValue(SamplesProperty, value); }
+            get
+            {
+                return position;
+            }
         }
 
         public TicksDefinition Ticks { get; set; }
-
-        public double X
-        {
-            get { return (double)GetValue(XProperty); }
-            set { SetValue(XProperty, value); }
-        }
 
         public AxisDefinition XAxis
         {
@@ -94,117 +75,121 @@ namespace MathGrapher
             set { SetValue(YAxisProperty, value); }
         }
 
-        public void Clear()
-        {
-            BeginAnimation(XProperty, null);
-
-            var points = graphCanvas.Children.OfType<Ellipse>().ToArray();
-
-            foreach (var point in points)
-            {
-                graphCanvas.Children.Remove(point);
-            }
-        }
-
         public override void OnApplyTemplate()
         {
             graphCanvas = (Canvas)Template.FindName("PART_GraphCanvas", this);
+
             Draw();
-            UpdateContextMenu();
         }
 
-        internal void DrawFunction()
+        public void Pause()
         {
-            if (graphCanvas == null || Function == null)
+            animationTimer.Stop();
+        }
+
+        public void Seek(int value)
+        {
+            if (Animation == null || value >= Animation.Values.Count)
             {
                 return;
             }
 
-            Clear();
-
-            if (DomainAnimation != null)
+            foreach (var item in animatedPoints)
             {
-                BeginAnimation(XProperty, DomainAnimation);
+                var result = item.Key.Function(Animation.Values[value]);
+                Canvas.SetLeft(item.Value, originX + (result.X / XAxis.Interval) * tickWidthX - item.Key.Thickness / 2);
+                Canvas.SetTop(item.Value, originY - (result.Y / YAxis.Interval) * tickWidthY - item.Key.Thickness / 2);
             }
-            else
-            {
-                var sampleWidth = (Domain.Y - Domain.X) / Samples;
 
-                for (double i = Domain.X; i < Domain.Y; i += sampleWidth)
+            Console.Write($"Seek {value}");
+
+            position = value;
+        }
+
+        public void Start()
+        {
+            if (Animation == null)
+            {
+                return;
+            }
+
+            if (animationTimer == null)
+            {
+                animationTimer = new Timer(Animation.Delay.TotalMilliseconds);
+                animationTimer.AutoReset = true;
+                animationTimer.Elapsed += AnimationTimer_Elapsed;
+            }
+
+            foreach (var functionDefinition in FunctionDefinitions)
+            {
+                if (!functionDefinition.IsAnimated)
+                {
+                    continue;
+                }
+
+                if (!animatedPoints.ContainsKey(functionDefinition))
                 {
                     var point = new Ellipse();
-                    point.Fill = new SolidColorBrush(PointColor);
+                    point.Fill = functionDefinition.Brush;
                     point.StrokeThickness = 0;
-                    point.Width = PointSize.Width;
-                    point.Height = PointSize.Height;
-
-                    var result = Function(i);
-
-                    Canvas.SetLeft(point, originX + (result.X / XAxis.Interval) * tickWidthX - PointSize.Width / 2);
-                    Canvas.SetTop(point, originY - (result.Y / YAxis.Interval) * tickWidthY - PointSize.Height / 2);
-
+                    point.Width = functionDefinition.Thickness;
+                    point.Height = functionDefinition.Thickness;
                     graphCanvas.Children.Add(point);
+                    animatedPoints.Add(functionDefinition, point);
                 }
             }
+
+            animationTimer.Start();
         }
 
-        private static void DomainAnimationChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        public void Stop()
         {
-            var graph = (Graph)d;
-
-            graph.DrawFunction();           
+            animationTimer.Stop();
+            Seek(0);
         }
 
-        private void UpdateContextMenu()
+        internal void DrawFunctions()
         {
-            if (ContextMenu == null)
+            if (graphCanvas == null || FunctionDefinitions == null)
             {
-                ContextMenu = new ContextMenu();
+                return;
             }
-            else
+
+            foreach (var functionDefinition in FunctionDefinitions)
             {
-                ContextMenu.Items.Clear();
-            }
-            
-            if (DomainAnimation == null)
-            {
-                if (saveAsPngCommand == null)
+                if (!functionDefinition.IsAnimated)
                 {
-                    saveAsPngCommand = new SaveAsPngCommand();
+                    var sampleWidth = (XAxis.Max - XAxis.Min) / functionDefinition.SampleCount;
+
+                    var geometry = new StreamGeometry();
+                    var path = new Path();
+                    path.Data = geometry;
+                    path.StrokeThickness = functionDefinition.Thickness;
+                    path.Stroke = functionDefinition.Brush;
+                    var context = geometry.Open();
+                    
+                    for (int i = 0; i < functionDefinition.SampleCount; i++)
+                    {
+                        var result = functionDefinition.Function(XAxis.Min + sampleWidth * i);
+
+                        var x = originX + (result.X / XAxis.Interval) * tickWidthX - functionDefinition.Thickness / 2;
+                        var y = originY - (result.Y / YAxis.Interval) * tickWidthY - functionDefinition.Thickness / 2;
+
+                        if (i == 0)
+                        {
+                            context.BeginFigure(new Point(x, y), false, false);
+                        }
+                        else
+                        {
+                            context.LineTo(new Point(x, y), true, true);
+                        }
+                    }
+                   
+                    context.Close();
+
+                    graphCanvas.Children.Add(path);
                 }
-
-                ContextMenu.Items.Add(new MenuItem() { Header = "Save As PNG…", CommandParameter = this, Command = saveAsPngCommand });
             }
-            else
-            {
-                if (saveAsGifCommand == null)
-                {
-                    saveAsGifCommand = new SaveAsGifCommand();
-                }
-
-                ContextMenu.Items.Add(new MenuItem() { Header = "Save As Animated GIF…", CommandParameter = this, Command = saveAsGifCommand });
-            }
-        }       
-
-        private static void DomainChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var graph = (Graph)d;
-
-            graph.DrawFunction();
-        }
-
-        private static void FunctionChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var graph = (Graph)d;
-
-            graph.DrawFunction();
-        }
-
-        private static void SamplesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var graph = (Graph)d;
-
-            graph.DrawFunction();
         }
 
         private static void XAxisChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -214,18 +199,23 @@ namespace MathGrapher
             graph.Draw();
         }
 
-        private static void XPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var graph = (Graph)d;
-
-            graph.UpdatePoint();
-        }
-
         private static void YAxisChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var graph = (Graph)d;
 
             graph.Draw();
+        }
+
+        private void AnimationTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            if (Position < Animation.Values.Count)
+            {
+                Dispatcher.BeginInvoke(new Action(() => Seek(position += 1)));
+            }
+            else
+            {
+                Dispatcher.BeginInvoke(new Action(() => Seek(position = 0)));
+            }
         }
 
         private void CalculateOrigin()
@@ -282,9 +272,10 @@ namespace MathGrapher
 
             graphCanvas.Children.Clear();
             CalculateOrigin();
-            DrawFunction();
+            DrawFunctions();
             DrawXAxis();
             DrawYAxis();
+            UpdateContextMenu();
         }
 
         private void DrawXAxis()
@@ -328,7 +319,7 @@ namespace MathGrapher
                     tickLabel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
                     Canvas.SetLeft(tickLabel, originY - i * tickWidthX - tickLabel.DesiredSize.Width / 2);
                     Canvas.SetTop(tickLabel, originX + XAxis.TickLabelGenerator.LabelOffset);
-                    graphCanvas.Children.Add(tickLabel); 
+                    graphCanvas.Children.Add(tickLabel);
                 }
 
                 var tickLabel2 = XAxis.TickLabelGenerator.Generate(i * XAxis.Interval);
@@ -338,7 +329,7 @@ namespace MathGrapher
                     tickLabel2.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
                     Canvas.SetLeft(tickLabel2, originY + i * tickWidthX - tickLabel2.DesiredSize.Width / 2);
                     Canvas.SetTop(tickLabel2, originX + XAxis.TickLabelGenerator.LabelOffset);
-                    graphCanvas.Children.Add(tickLabel2); 
+                    graphCanvas.Children.Add(tickLabel2);
                 }
             }
         }
@@ -417,7 +408,6 @@ namespace MathGrapher
                     Canvas.SetTop(tickLabel, originY + i * tickWidthY - tickLabel.DesiredSize.Height / 2);
                     graphCanvas.Children.Add(tickLabel);
                 }
-                
 
                 var tickLabel2 = YAxis.TickLabelGenerator.Generate(i * YAxis.Interval);
 
@@ -427,7 +417,7 @@ namespace MathGrapher
                     Canvas.SetLeft(tickLabel2, originX - XAxis.TickLabelGenerator.LabelOffset - tickLabel2.DesiredSize.Width);
                     Canvas.SetTop(tickLabel2, originY - i * tickWidthY - tickLabel2.DesiredSize.Height / 2);
                     graphCanvas.Children.Add(tickLabel2);
-                }               
+                }
             }
         }
 
@@ -462,25 +452,40 @@ namespace MathGrapher
             }
         }
 
-        private void UpdatePoint()
+        private void FunctionDefinitions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            var point = graphCanvas.Children.OfType<Ellipse>().FirstOrDefault();
+            Draw();
+        }
 
-            if (point == null)
+        private void UpdateContextMenu()
+        {
+            if (ContextMenu == null)
             {
-                point = new Ellipse();
-                point.Fill = new SolidColorBrush(PointColor);
-                point.StrokeThickness = 0;
-                point.Width = PointSize.Width;
-                point.Height = PointSize.Height;
-
-                graphCanvas.Children.Add(point);
+                ContextMenu = new ContextMenu();
+            }
+            else
+            {
+                ContextMenu.Items.Clear();
             }
 
-            var result = Function(X);
+            if (Animation != null)
+            {
+                if (saveAsGifCommand == null)
+                {
+                    saveAsGifCommand = new SaveAsGifCommand();
+                }
 
-            Canvas.SetLeft(point, originX + (result.X / XAxis.Interval) * tickWidthX - PointSize.Width / 2);
-            Canvas.SetTop(point, originY - (result.Y / YAxis.Interval) * tickWidthY - PointSize.Height / 2);
+                ContextMenu.Items.Add(new MenuItem() { Header = "Save As Animated GIF…", CommandParameter = this, Command = saveAsGifCommand });
+            }
+            else
+            {
+                if (saveAsPngCommand == null)
+                {
+                    saveAsPngCommand = new SaveAsPngCommand();
+                }
+
+                ContextMenu.Items.Add(new MenuItem() { Header = "Save As PNG…", CommandParameter = this, Command = saveAsPngCommand });
+            }
         }
     }
 }
