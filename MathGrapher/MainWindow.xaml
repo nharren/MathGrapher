@@ -18,12 +18,15 @@
                  Height="500"
                  Background="White">
         <local:Graph.XAxis>
-            <local:AxisDefinition TickLabelGenerator="{StaticResource WholeNumberTickLabelGenerator}" />
+            <local:AxisDefinition Interval="1"
+                                  Max="5.0"
+                                  Min="-5.0"
+                                  TickLabelGenerator="{StaticResource WholeNumberTickLabelGenerator}" />
         </local:Graph.XAxis>
         <local:Graph.YAxis>
-            <local:AxisDefinition Interval="0.5"
-                                  Max="1.5"
-                                  Min="-1.5"
+            <local:AxisDefinition Interval="1"
+                                  Max="5.0"
+                                  Min="-5.0"
                                   TickLabelGenerator="{StaticResource WholeNumberTickLabelGenerator}" />
         </local:Graph.YAxis>
         <local:Graph.Ticks>

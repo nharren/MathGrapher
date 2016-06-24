@@ -10,5 +10,13 @@ namespace MathGrapher
         public double Interval { get; set; } = 1;
         public double Thickness { get; set; } = 1;
         public ITickLabelGenerator TickLabelGenerator { get; set; } = new DefaultTickLabelGenerator();
+
+        internal double TickCount
+        {
+            get
+            {
+                return (Max - Min) / Interval;
+            }
+        }
     }
 }

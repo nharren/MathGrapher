@@ -22,6 +22,7 @@ namespace MathGrapher
             Delay = TimeSpan.FromSeconds(1.0 / fps);
         }
 
+        public bool Repeat { get; set; } = true;
         public TimeSpan Delay { get; set; }
         public List<double> Values { get; } = new List<double>();
     }

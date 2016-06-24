@@ -12,5 +12,6 @@ namespace MathGrapher
         public bool IsAnimated { get; set; }
         public int SampleCount { get; set; }
         public double Thickness { get; set; }
+        public bool ConnectSamples { get; set; } = true;
     }
 }
