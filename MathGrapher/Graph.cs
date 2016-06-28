@@ -115,14 +115,7 @@ namespace MathGrapher
             if (Animation == null)
             {
                 return;
-            }
-
-            if (animationTimer == null)
-            {
-                animationTimer = new Timer(Animation.Delay.TotalMilliseconds);
-                animationTimer.AutoReset = true;
-                animationTimer.Elapsed += AnimationTimer_Elapsed;
-            }
+            }            
 
             foreach (var functionDefinition in FunctionDefinitions)
             {
@@ -145,6 +138,14 @@ namespace MathGrapher
                 }
             }
 
+            if (animationTimer == null)
+            {
+                animationTimer = new Timer(Animation.Delay.TotalMilliseconds);
+                animationTimer.AutoReset = true;
+                animationTimer.Elapsed += AnimationTimer_Elapsed;
+            }
+
+            Seek(0);
             animationTimer.Start();
         }
 
@@ -250,8 +251,8 @@ namespace MathGrapher
         }
 
         private void AnimationTimer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            if (Position < Animation.Values.Count)
+        {            
+            if (Position < Animation.Values.Count - 1)
             {
                 Dispatcher.BeginInvoke(new Action(() => Seek(position += 1)));
             }

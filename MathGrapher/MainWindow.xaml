@@ -19,14 +19,14 @@
                  Background="White">
         <local:Graph.XAxis>
             <local:AxisDefinition Interval="1"
-                                  Max="5.0"
-                                  Min="-5.0"
+                                  Max="5"
+                                  Min="-5"
                                   TickLabelGenerator="{StaticResource WholeNumberTickLabelGenerator}" />
         </local:Graph.XAxis>
         <local:Graph.YAxis>
             <local:AxisDefinition Interval="1"
-                                  Max="5.0"
-                                  Min="-5.0"
+                                  Max="5"
+                                  Min="-5"
                                   TickLabelGenerator="{StaticResource WholeNumberTickLabelGenerator}" />
         </local:Graph.YAxis>
         <local:Graph.Ticks>

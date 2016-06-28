@@ -12,7 +12,7 @@ namespace MathGrapher
         public GraphAnimation(double from, double to, double seconds, int fps)
         {
             var frameCount = seconds * fps;
-            var interval = (to - from) / frameCount;
+            var interval = (to - from + 1) / frameCount;
 
             for (int i = 0; i < frameCount; i++)
             {
